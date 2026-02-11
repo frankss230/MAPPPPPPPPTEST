@@ -1,0 +1,270 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_PUBLIC_URL")
+  directUrl = env("DATABASE_PUBLIC_URL_NON_POOLING")
+}
+
+model status {
+  status_id   Int     @id @default(autoincrement())
+  status_name String  @db.VarChar(200)
+  users       users[]
+}
+
+model gender {
+  gender_id       Int              @id @default(autoincrement())
+  gender_describe String           @db.VarChar(100)
+  takecareperson  takecareperson[]
+}
+
+model marrystatus {
+  marry_id       Int              @id @default(autoincrement())
+  marry_describe String           @db.VarChar(100)
+  takecareperson takecareperson[]
+}
+
+model users {
+  users_id             Int                    @id @default(autoincrement())
+  users_line_id        String?                @db.VarChar(33)
+  users_fname          String                 @db.VarChar(100)
+  users_sname          String                 @db.VarChar(100)
+  users_status_onweb   Int                    @default(0)
+  users_number         String?                @db.VarChar(10)
+  users_moo            String?                @db.VarChar(5)
+  users_road           String?                @db.VarChar(200)
+  users_tubon          String?                @db.VarChar(100)
+  users_amphur         String?                @db.VarChar(100)
+  users_province       String?                @db.VarChar(100)
+  users_postcode       String?                @db.VarChar(5)
+  users_tel1           String?                @db.VarChar(12)
+  users_tel_home       String?                @db.VarChar(12)
+  users_passwd         String                 @db.VarChar(100)
+  users_pin            Int
+  status_id            Int
+  users_alert_battery  Int?                   @default(0)
+  users_status_active  Int                    @default(1)
+  users_related_borrow String?                @db.VarChar(255)
+  users_token          String?
+  users_user           String?                @db.VarChar(100)
+  approved_borrows     borrowequipment[]      @relation("borrow_approver")
+  return_borrows       borrowequipment[]      @relation("borrow_return_user_id")
+  borrowequipment      borrowequipment[]
+  fall_records         fall_records[]
+  heartrate_records    heartrate_records[]
+  heartrate_settings   heartrate_settings[]
+  location             location[]
+  safezone             safezone[]
+  takecareperson       takecareperson[]
+  temperature_records  temperature_records[]
+  temperature_settings temperature_settings[]
+  users_status_id      status                 @relation(fields: [status_id], references: [status_id])
+}
+
+model takecareperson {
+  users_id             Int
+  takecare_id          Int                    @id @default(autoincrement())
+  takecare_fname       String                 @db.VarChar(100)
+  takecare_sname       String                 @db.VarChar(100)
+  takecare_birthday    DateTime               @db.Date
+  gender_id            Int
+  marry_id             Int
+  takecare_number      String?                @db.VarChar(10)
+  takecare_moo         String?                @db.VarChar(5)
+  takecare_road        String?                @db.VarChar(200)
+  takecare_tubon       String?                @db.VarChar(100)
+  takecare_amphur      String?                @db.VarChar(100)
+  takecare_province    String?                @db.VarChar(100)
+  takecare_postcode    String?                @db.VarChar(5)
+  takecare_tel1        String?                @db.VarChar(12)
+  takecare_tel_home    String?                @db.VarChar(12)
+  takecare_disease     String?                @db.VarChar(300)
+  takecare_drug        String?                @db.VarChar(300)
+  takecare_status      Int                    @default(1)
+  fall_records         fall_records[]
+  heartrate_records    heartrate_records[]
+  heartrate_settings   heartrate_settings[]
+  location             location[]
+  safezone             safezone[]
+  gender_id_ref        gender                 @relation(fields: [gender_id], references: [gender_id])
+  marry_id_ref         marrystatus            @relation(fields: [marry_id], references: [marry_id])
+  users_id_ref         users                  @relation(fields: [users_id], references: [users_id])
+  temperature_records  temperature_records[]
+  temperature_settings temperature_settings[]
+}
+
+model safezone {
+  takecare_id     Int
+  users_id        Int
+  safezone_id     Int            @id @default(autoincrement())
+  safez_latitude  String         @default("0") @db.VarChar(255)
+  safez_longitude String         @default("0") @db.VarChar(255)
+  safez_radiuslv1 Int            @default(0)
+  safez_radiuslv2 Int            @default(0)
+  takecare_id_ref takecareperson @relation(fields: [takecare_id], references: [takecare_id])
+  users_id_ref    users          @relation(fields: [users_id], references: [users_id])
+}
+
+model location {
+  users_id          Int
+  takecare_id       Int
+  location_id       Int            @id @default(autoincrement())
+  locat_timestamp   DateTime       @db.Date
+  locat_latitude    String         @default("0") @db.VarChar(255)
+  locat_longitude   String         @default("0") @db.VarChar(255)
+  locat_status      Int            @default(1)
+  locat_distance    Int            @default(0)
+  locat_battery     Int            @default(0)
+  locat_noti_time   DateTime?
+  locat_noti_status Int?
+  takecare_id_ref   takecareperson @relation(fields: [takecare_id], references: [takecare_id])
+  users_id_ref      users          @relation(fields: [users_id], references: [users_id])
+}
+
+model dlocation {
+  dlocation_id    Int      @id @default(autoincrement())
+  users_id        Int
+  locat_battery   Int
+  locat_distance  Int
+  locat_status    Int
+  locat_longitude String
+  locat_latitude  String
+  locat_timestamp DateTime
+  location_id     Int
+  takecare_id     Int
+}
+
+model extendedhelp {
+  exten_id               Int       @id @default(autoincrement())
+  exten_date             DateTime  @db.Date
+  user_id                Int?
+  takecare_id            Int?
+  exten_latitude         String?   @db.VarChar(255)
+  exten_longitude        String?   @db.VarChar(255)
+  exten_received_date    DateTime?
+  exten_received_user_id Int?
+  exted_closed_date      DateTime?
+  exten_closed_user_id   Int?
+}
+
+model groupLine {
+  group_id      Int     @id @default(autoincrement())
+  group_name    String? @db.VarChar(100)
+  group_line_id String  @db.VarChar(100)
+  group_status  Int     @default(1)
+}
+
+model borrowequipment {
+  borrow_id               Int                    @id @default(autoincrement())
+  borrow_date             DateTime               @db.Date
+  borrow_return           DateTime?
+  borrow_status           Int                    @default(1)
+  borrow_user_id          Int
+  borrow_address          String
+  borrow_tel              String                 @db.VarChar(12)
+  borrow_objective        String
+  borrow_name             String                 @db.VarChar(255)
+  borrow_equipment_status Int                    @default(1)
+  borrow_create_date      DateTime               @db.Date
+  borrow_update_date      DateTime               @db.Date
+  borrow_update_user_id   Int
+  borrow_delete_date      DateTime?
+  status                  Int                    @default(1)
+  borrow_approver         Int?
+  borrow_approver_date    DateTime?
+  borrow_return_user_id   Int?
+  borrow_return_date      DateTime?
+  borrow_send_date        DateTime?
+  borrow_send_return      DateTime?
+  borrow_send_status      Int                    @default(1)
+  borrow_approver_ref     users?                 @relation("borrow_approver", fields: [borrow_approver], references: [users_id])
+  borrow_return_user_ref  users?                 @relation("borrow_return_user_id", fields: [borrow_return_user_id], references: [users_id])
+  users_id_ref            users                  @relation(fields: [borrow_user_id], references: [users_id])
+  borrowequipment_list    borrowequipment_list[]
+}
+
+model borrowequipment_list {
+  borrow_id               Int
+  borrow_equipment_id     Int             @id @default(autoincrement())
+  borrow_equipment_status Int             @default(1)
+  borrow_equipment_delete DateTime?
+  equipment_id            Int
+  borrow_id_ref           borrowequipment @relation(fields: [borrow_id], references: [borrow_id])
+  equipment               equipment       @relation(fields: [equipment_id], references: [equipment_id])
+}
+
+model equipment {
+  equipment_id          Int                    @id @default(autoincrement())
+  equipment_name        String                 @db.VarChar(255)
+  equipment_code        String                 @unique @db.VarChar(100)
+  equipment_status      Int                    @default(1)
+  equipment_create_date DateTime?              @default(now()) @db.Timestamp(6)
+  equipment_update_date DateTime?              @db.Timestamp(6)
+  borrowequipment_list  borrowequipment_list[]
+}
+
+model fall_records {
+  fall_id        Int            @id @default(autoincrement())
+  users_id       Int
+  takecare_id    Int
+  fall_timestamp DateTime?      @default(now()) @db.Timestamp(6)
+  fall_latitude  String?        @default("0") @db.VarChar(255)
+  fall_longitude String?        @default("0") @db.VarChar(255)
+  x_axis         Float
+  y_axis         Float
+  z_axis         Float
+  fall_status    Int?           @default(0)
+  noti_time      DateTime?      @db.Timestamp(6)
+  noti_status    Int?
+  takecareperson takecareperson @relation(fields: [takecare_id], references: [takecare_id], map: "fk_takecare_fall_records")
+  users          users          @relation(fields: [users_id], references: [users_id], map: "fk_users_fall_records")
+}
+
+model heartrate_records {
+  heartrate_id   Int            @id @default(autoincrement())
+  users_id       Int
+  takecare_id    Int
+  bpm            Int
+  timestamp      DateTime?      @default(now()) @db.Timestamp(6)
+  status         Int?           @default(1)
+  noti_time      DateTime?      @db.Timestamp(6)
+  noti_status    Int?
+  record_date    DateTime?      @default(dbgenerated("CURRENT_DATE")) @db.Date
+  takecareperson takecareperson @relation(fields: [takecare_id], references: [takecare_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_takecareperson_hr")
+  users          users          @relation(fields: [users_id], references: [users_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_hr")
+}
+
+model heartrate_settings {
+  id             Int            @id @default(autoincrement())
+  users_id       Int
+  takecare_id    Int
+  max_bpm        Int
+  min_bpm        Int
+  takecareperson takecareperson @relation(fields: [takecare_id], references: [takecare_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_takecareperson_hrset")
+  users          users          @relation(fields: [users_id], references: [users_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_hrset")
+}
+
+model temperature_records {
+  temperature_id    Int            @id @default(autoincrement())
+  users_id          Int
+  takecare_id       Int
+  temperature_value Float
+  record_date       DateTime?      @default(dbgenerated("CURRENT_DATE")) @db.Date
+  status            Int            @default(0)
+  noti_time         DateTime?      @db.Timestamp(6)
+  noti_status       Int?
+  takecareperson    takecareperson @relation(fields: [takecare_id], references: [takecare_id], map: "fk_takecare_temperature_records")
+  users             users          @relation(fields: [users_id], references: [users_id], map: "fk_users_temperature_records")
+}
+
+model temperature_settings {
+  setting_id      Int            @id @default(autoincrement())
+  users_id        Int
+  takecare_id     Int
+  max_temperature Float          @default(37)
+  takecareperson  takecareperson @relation(fields: [takecare_id], references: [takecare_id], map: "fk_takecare_temperature_settings")
+  users           users          @relation(fields: [users_id], references: [users_id], map: "fk_users_temperature_settings")
+}
