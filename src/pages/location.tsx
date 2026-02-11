@@ -115,10 +115,12 @@ const Location = () => {
   }
 
   useEffect(() => {
+    const sb = supabase
+    if (!sb) return
     if (!dataUser?.userData?.users_id || !dataUser?.takecareData?.takecare_id) return
 
     const fetchInitialLocation = async () => {
-      const { data } = await supabase
+      const { data } = await sb
         .from('locations')
         .select('*')
         .eq('takecare_id', dataUser.takecareData.takecare_id)
@@ -134,7 +136,7 @@ const Location = () => {
 
     fetchInitialLocation()
 
-    const channel = supabase
+    const channel = sb
       .channel('schema-db-changes-location')
       .on(
         'postgres_changes',
@@ -156,7 +158,7 @@ const Location = () => {
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      sb.removeChannel(channel)
     }
   }, [dataUser])
 
